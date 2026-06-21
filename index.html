@@ -133,6 +133,9 @@
 
         .screen-content { display: none; }
         .screen-content.active { display: block; }
+
+        /* إخفاء شاشة الدخول فوراً عند التحميل إذا كان هناك مستخدم مسجل */
+        .login-hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
@@ -950,10 +953,13 @@
                                     <select id="filter-req-sub" onchange="renderRequestsTable()" class="border rounded p-1 bg-white outline-none w-28">
                                         <option value="">الكل</option>
                                     </select>
+                                    <button onclick="exportRequestsPDF()" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold transition flex items-center gap-1">
+                                        <i class="fa-solid fa-file-pdf"></i> PDF
+                                    </button>
                                 </div>
                             </div>
                             <div class="overflow-x-auto">
-                                <table class="report-table">
+                                <table class="report-table" id="requests-report-table">
                                     <thead>
                                         <tr>
                                             <th>الكود</th>
@@ -1513,7 +1519,36 @@
         }
         setInterval(updateLiveDateTime, 1000);
 
+        // ============================================
+        // التحقق من حالة المستخدم فوراً عند تحميل الصفحة
+        // ============================================
+        function checkSessionAndShowDashboard() {
+            const savedUser = localStorage.getItem('gilm_user');
+            const savedScreen = localStorage.getItem('gilm_screen');
+            
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    const validUser = appState.settings.users.find(u => u.empId === user.empId && u.code === user.code);
+                    if (validUser) {
+                        appState.currentActiveUser = validUser;
+                        if (savedScreen) {
+                            appState.currentScreen = savedScreen;
+                        }
+                        // إخفاء شاشة الدخول فوراً
+                        document.getElementById('login-screen').classList.add('login-hidden');
+                        showDashboard();
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error restoring state:', e);
+                }
+            }
+            return false;
+        }
+
         function showLogin() {
+            document.getElementById('login-screen').classList.remove('login-hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('main-app').classList.add('hidden');
             if (appState.settings.logoImage) {
@@ -1522,6 +1557,7 @@
         }
 
         function showDashboard() {
+            document.getElementById('login-screen').classList.add('login-hidden');
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
 
@@ -1615,28 +1651,6 @@
                 localStorage.setItem('gilm_screen', appState.currentScreen);
             }
         });
-
-        function restoreState() {
-            const savedUser = localStorage.getItem('gilm_user');
-            const savedScreen = localStorage.getItem('gilm_screen');
-            
-            if (savedUser) {
-                try {
-                    const user = JSON.parse(savedUser);
-                    const validUser = appState.settings.users.find(u => u.empId === user.empId && u.code === user.code);
-                    if (validUser) {
-                        appState.currentActiveUser = validUser;
-                        if (savedScreen) {
-                            appState.currentScreen = savedScreen;
-                        }
-                        return true;
-                    }
-                } catch (e) {
-                    console.error('Error restoring state:', e);
-                }
-            }
-            return false;
-        }
 
         // ============================================
         // دوال تسجيل الدخول - حدث
@@ -2965,6 +2979,78 @@
         }
 
         // ============================================
+        // تقرير طلبات المواد PDF
+        // ============================================
+        function exportRequestsPDF() {
+            const filterMain = document.getElementById('filter-req-main')?.value || '';
+            const filterSub = document.getElementById('filter-req-sub')?.value || '';
+
+            const filtered = appState.requests.filter(r => {
+                const matchesMain = !filterMain || r.mainLocation === filterMain;
+                const matchesSub = !filterSub || r.subLocation === filterSub;
+                return matchesMain && matchesSub;
+            });
+
+            if (filtered.length === 0) {
+                alertCustom("لا توجد طلبات لعرضها في التقرير!");
+                return;
+            }
+
+            let tableRows = '';
+            filtered.forEach(r => {
+                tableRows += `
+                    <tr>
+                        <td class="border p-2 text-xs">${r.code}</td>
+                        <td class="border p-2 text-xs font-bold">${r.name}</td>
+                        <td class="border p-2 text-xs">${r.mainLocation || ''} ${r.subLocation ? '- '+r.subLocation : ''}</td>
+                        <td class="border p-2 text-xs">${r.unit}</td>
+                        <td class="border p-2 text-xs font-bold text-amber-600">${r.qty}</td>
+                        <td class="border p-2 text-xs">${r.date}</td>
+                        <td class="border p-2 text-xs"><span class="font-bold ${r.status === 'معتمد' ? 'text-emerald-600' : 'text-amber-600'}">${r.status}</span></td>
+                    </tr>
+                `;
+            });
+
+            const content = `
+                <div class="text-center">
+                    <span class="px-6 py-2 bg-emerald-50 border-2 border-emerald-800 text-emerald-900 text-lg font-bold rounded-full shadow-sm tracking-wide">تقرير طلبات المواد</span>
+                </div>
+                <div class="mt-8 overflow-x-auto">
+                    <table class="w-full border-collapse border border-emerald-600 text-sm text-right">
+                        <thead>
+                            <tr class="bg-emerald-50">
+                                <th class="border p-2 text-xs font-bold">الكود</th>
+                                <th class="border p-2 text-xs font-bold">اسم الصنف</th>
+                                <th class="border p-2 text-xs font-bold">الموقع</th>
+                                <th class="border p-2 text-xs font-bold">الوحدة</th>
+                                <th class="border p-2 text-xs font-bold">الكمية</th>
+                                <th class="border p-2 text-xs font-bold">التاريخ</th>
+                                <th class="border p-2 text-xs font-bold">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 text-xs text-gray-500 text-center">
+                    عدد الطلبات: ${filtered.length}
+                </div>
+            `;
+
+            document.getElementById('cert-dynamic-content').innerHTML = content;
+
+            const options = {
+                margin: [10, 10, 10, 10],
+                filename: `تقرير_طلبات_المواد.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(document.getElementById('print-area')).set(options).save();
+        }
+
+        // ============================================
         // دوال الإعدادات
         // ============================================
         function uploadLogo(inputObj) {
@@ -3075,7 +3161,7 @@
         }
 
         // ============================================
-        // بدء التشغيل مع استعادة الحالة
+        // بدء التشغيل - التحقق الفوري من الجلسة
         // ============================================
         window.onload = async function() {
             await loadAllData();
@@ -3089,12 +3175,10 @@
             console.log("📋 المستخدمين المسجلين:");
             console.table(appState.settings.users);
 
-            if (restoreState()) {
-                showDashboard();
-                localStorage.setItem('gilm_screen', appState.currentScreen);
-            } else if (appState.currentActiveUser) {
-                showDashboard();
-            } else {
+            // التحقق من الجلسة فوراً وإخفاء شاشة الدخول إذا كان هناك مستخدم
+            const hasSession = checkSessionAndShowDashboard();
+            
+            if (!hasSession) {
                 showLogin();
             }
         };
