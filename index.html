@@ -134,8 +134,42 @@
         .screen-content { display: none; }
         .screen-content.active { display: block; }
 
-        /* إخفاء شاشة الدخول فوراً عند التحميل إذا كان هناك مستخدم مسجل */
         .login-hidden { display: none !important; }
+        
+        /* تنسيق شهادة الراتب */
+        .salary-cert {
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.8;
+        }
+        .salary-cert .header {
+            border-bottom: 3px solid #065f46;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .salary-cert .footer {
+            border-top: 3px solid #065f46;
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+        .salary-cert .title {
+            background: #f0fdf4;
+            border: 2px solid #065f46;
+            padding: 8px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 20px;
+            font-weight: bold;
+            color: #065f46;
+        }
+        .salary-cert table td {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+        }
+        .salary-cert table td:first-child {
+            background: #f0fdf4;
+            font-weight: bold;
+            width: 30%;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
@@ -145,7 +179,7 @@
         <div class="bg-white/95 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 border-0">
             <div class="text-center mb-8">
                 <div class="w-[120px] h-[120px] bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                    <img id="login-logo" src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=120&h=120" alt="شعار الشركة" class="w-[120px] h-[120px] object-cover">
+                    <img id="login-logo" src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="شعار الشركة" class="w-[120px] h-[120px] object-cover">
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800">الجزيرة الخضراء للمواشي والاغنام</h2>
                 <p class="text-sm text-emerald-600 font-semibold mt-1">Green Island Livestock</p>
@@ -188,7 +222,7 @@
                 <button onclick="toggleSidebar()" class="p-2 text-emerald-900 hover:bg-emerald-200 rounded-xl focus:outline-none transition-colors duration-200">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <img id="header-logo" src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=120&h=120" alt="شعار الشركة" class="w-[40px] h-[40px] object-cover rounded-md">
+                <img id="header-logo" src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="شعار الشركة" class="w-[40px] h-[40px] object-cover rounded-md">
                 <div>
                     <h1 class="text-base md:text-xl font-bold text-emerald-900 leading-tight">شركة الجزيرة الخضراء لتجارة الأغنام والمواشي</h1>
                     <p class="text-[10px] md:text-xs text-emerald-700 font-semibold" id="user-display-info">مرحباً بك في النظام الرئيسي</p>
@@ -240,6 +274,11 @@
                     <button onclick="switchScreen('attendance-manage')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-right hover:bg-slate-800" data-screen="attendance-manage">
                         <i class="fa-solid fa-clipboard-user text-emerald-400 w-6"></i>
                         <span class="font-semibold text-sm">شيت الحضور والانصراف</span>
+                    </button>
+                    <div class="pt-4 pb-1 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">التقارير</div>
+                    <button onclick="switchScreen('reports-manage')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-right hover:bg-slate-800" data-screen="reports-manage">
+                        <i class="fa-solid fa-file-alt text-emerald-400 w-6"></i>
+                        <span class="font-semibold text-sm">التقارير</span>
                     </button>
                     <div class="pt-4 pb-1 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">العمليات</div>
                     <button onclick="switchScreen('maintenance-manage')" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-right hover:bg-slate-800" data-screen="maintenance-manage">
@@ -366,7 +405,7 @@
                                     <input type="tel" id="emp-phone" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="05xxxxxxxx">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1">الراتب الشهري</label>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">الراتب الأساسي</label>
                                     <input type="number" id="emp-salary" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none">
                                 </div>
                             </div>
@@ -621,6 +660,78 @@
                                 </thead>
                                 <tbody id="attendance-table-body"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شاشة التقارير -->
+                <div id="screen-reports-manage" class="screen-content space-y-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl md:text-2xl font-bold text-emerald-900">التقارير</h2>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- تقرير الحضور والانصراف وكشف الرواتب -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-500/10">
+                            <h3 class="text-base md:text-lg font-bold text-gray-800 mb-4 border-b pb-2">
+                                <i class="fa-solid fa-file-alt text-emerald-600 ml-2"></i>
+                                تقرير الحضور والانصراف وكشف الرواتب
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4">تقرير شامل للموظفين يتضمن: عدد أيام الحضور، الراتب الأساسي، الراتب الإجمالي</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">المسلخ الرئيسي</label>
+                                    <select id="report-main-slaughterhouse" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none bg-white">
+                                        <option value="">الكل</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">المسلخ الفرعي</label>
+                                    <select id="report-sub-slaughterhouse" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none bg-white">
+                                        <option value="">الكل</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1">من تاريخ</label>
+                                        <input type="date" id="report-date-from" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1">إلى تاريخ</label>
+                                        <input type="date" id="report-date-to" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                </div>
+                                <button onclick="generateAttendanceSalaryReport()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-file-pdf"></i> إنشاء التقرير PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- شهادة راتب موظف -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-500/10">
+                            <h3 class="text-base md:text-lg font-bold text-gray-800 mb-4 border-b pb-2">
+                                <i class="fa-solid fa-certificate text-emerald-600 ml-2"></i>
+                                شهادة راتب (PDF حقيقي)
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4">شهادة راتب رسمية تحتوي على جميع بيانات الموظف وليس الراتب فقط</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">اختر الموظف</label>
+                                    <select id="cert-emp-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none bg-white">
+                                        <option value="">-- اختر --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">نوع الشهادة</label>
+                                    <select id="cert-type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none bg-white">
+                                        <option value="راتب">شهادة راتب</option>
+                                        <option value="خبرة">شهادة خبرة</option>
+                                        <option value="توصية">شهادة توصية</option>
+                                    </select>
+                                </div>
+                                <button onclick="generateSalaryCertificate()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-file-pdf"></i> إنشاء الشهادة PDF
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -990,7 +1101,7 @@
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-500/10 space-y-4">
                             <h3 class="text-base md:text-lg font-bold text-gray-800 border-b pb-2"><i class="fa-solid fa-image text-emerald-600 ml-2"></i>تخصيص الشعار</h3>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-500 mb-1">تغيير شعار النظام (120×120)</label>
+                                <label class="block text-xs font-semibold text-gray-500 mb-1">تغيير شعار النظام</label>
                                 <input type="file" id="logo-uploader" onchange="uploadLogo(this)" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
                             </div>
                             <div>
@@ -1090,7 +1201,7 @@
         </footer>
     </div>
 
-    <!-- قالب الطباعة الموحد -->
+    <!-- قالب الطباعة الموحد للتقارير -->
     <div id="print-area" class="hidden p-12 bg-white text-gray-900 border-[16px] border-emerald-800 rounded-lg max-w-4xl mx-auto shadow-2xl relative min-h-[1000px] flex flex-col justify-between">
         <div class="flex justify-between items-center border-b-4 border-emerald-700 pb-6 mb-8">
             <div>
@@ -1099,7 +1210,7 @@
                 <p class="text-xs text-emerald-700 font-bold mt-2">شركة الشخص الواحد</p>
             </div>
             <div class="text-center">
-                <img id="cert-logo" src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=120&h=120" alt="الشعار" class="w-16 h-16 object-cover rounded-md border border-emerald-400 mx-auto mb-1">
+                <img id="cert-logo" src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="الشعار" class="w-16 h-16 object-cover rounded-md border border-emerald-400 mx-auto mb-1">
                 <span class="text-[10px] font-bold text-gray-400">شعار معتمد</span>
             </div>
         </div>
@@ -1175,7 +1286,7 @@
                     "مسالخ مدينة أبوظبي": ["مسلخ بني ياس"],
                     "مسالخ مدينة العين": ["مسلخ اليحر"]
                 },
-                logoImage: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=120&h=120",
+                logoImage: "https://cdn-icons-png.flaticon.com/512/616/616490.png",
                 welcomeImage: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=1200"
             },
             currentActiveUser: null,
@@ -1475,6 +1586,9 @@
 
             populateEmployeesDropdowns();
             toggleInputVisibility();
+            
+            // تحديث قائمة الموظفين في شاشة التقارير
+            populateReportDropdowns();
         }
 
         function toggleInputVisibility() {
@@ -1519,9 +1633,6 @@
         }
         setInterval(updateLiveDateTime, 1000);
 
-        // ============================================
-        // التحقق من حالة المستخدم فوراً عند تحميل الصفحة
-        // ============================================
         function checkSessionAndShowDashboard() {
             const savedUser = localStorage.getItem('gilm_user');
             const savedScreen = localStorage.getItem('gilm_screen');
@@ -1535,7 +1646,6 @@
                         if (savedScreen) {
                             appState.currentScreen = savedScreen;
                         }
-                        // إخفاء شاشة الدخول فوراً
                         document.getElementById('login-screen').classList.add('login-hidden');
                         showDashboard();
                         return true;
@@ -1583,6 +1693,7 @@
             updateSlaughterhouseDropdowns();
             renderSlaughterhousesTree();
             populateEmployeesDropdowns();
+            populateReportDropdowns();
             
             const lastScreen = appState.currentScreen || 'emp-manage';
             switchScreen(lastScreen);
@@ -1643,7 +1754,7 @@
         }
 
         // ============================================
-        // حفظ واستعادة الحالة عند تحديث الصفحة
+        // حفظ واستعادة الحالة
         // ============================================
         window.addEventListener('beforeunload', function(e) {
             if (appState.currentActiveUser) {
@@ -1653,7 +1764,7 @@
         });
 
         // ============================================
-        // دوال تسجيل الدخول - حدث
+        // دوال تسجيل الدخول
         // ============================================
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1675,7 +1786,7 @@
         function updateSlaughterhouseDropdowns() {
             const mainLocations = Object.keys(appState.settings.slaughterhouses);
             const selectors = ['emp-main-slaughterhouse', 'select-main-for-sub', 'maint-main-location',
-                'inv-main-location', 'pur-main-location', 'req-main-location'
+                'inv-main-location', 'pur-main-location', 'req-main-location', 'report-main-slaughterhouse'
             ];
             const filters = ['filter-emp-main', 'filter-att-main', 'filter-maint-main', 'filter-inv-main',
                 'filter-pur-main', 'filter-req-main'
@@ -1684,13 +1795,15 @@
             selectors.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.innerHTML = '';
+                const currentVal = el.value;
+                el.innerHTML = '<option value="">الكل</option>';
                 mainLocations.forEach(loc => {
                     const opt = document.createElement('option');
                     opt.value = loc;
                     opt.innerText = loc;
                     el.appendChild(opt);
                 });
+                if (currentVal) el.value = currentVal;
             });
 
             filters.forEach(id => {
@@ -1705,10 +1818,10 @@
                 });
             });
 
-            ['emp-sub-slaughterhouse', 'maint-sub-location', 'inv-sub-location', 'pur-sub-location', 'req-sub-location']
-            .forEach(id => {
+            ['emp-sub-slaughterhouse', 'maint-sub-location', 'inv-sub-location', 'pur-sub-location', 
+             'req-sub-location', 'report-sub-slaughterhouse'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.innerHTML = '<option value="">اختر الفرع</option>';
+                if (el) el.innerHTML = '<option value="">الكل</option>';
             });
 
             ['filter-emp-sub', 'filter-att-sub', 'filter-maint-sub', 'filter-inv-sub', 'filter-pur-sub',
@@ -1721,10 +1834,9 @@
 
         function populateSubDropdown(mainDropdown, subDropdown) {
             if (!mainDropdown || !subDropdown) return;
-            subDropdown.innerHTML = '';
+            subDropdown.innerHTML = '<option value="">الكل</option>';
             const selectedMain = mainDropdown.value;
             if (!selectedMain || !appState.settings.slaughterhouses[selectedMain]) {
-                subDropdown.innerHTML = '<option value="">اختر الرئيسي أولاً</option>';
                 return;
             }
             appState.settings.slaughterhouses[selectedMain].forEach(branch => {
@@ -1736,13 +1848,11 @@
         }
 
         function updateSubSlaughterhouseDropdown() {
-            populateSubDropdown(document.getElementById('emp-main-slaughterhouse'), document.getElementById(
-            'emp-sub-slaughterhouse'));
+            populateSubDropdown(document.getElementById('emp-main-slaughterhouse'), document.getElementById('emp-sub-slaughterhouse'));
         }
 
         function updateMaintSubLocationDropdown() {
-            populateSubDropdown(document.getElementById('maint-main-location'), document.getElementById(
-            'maint-sub-location'));
+            populateSubDropdown(document.getElementById('maint-main-location'), document.getElementById('maint-sub-location'));
         }
 
         function updateInvSubLocationDropdown() {
@@ -1757,53 +1867,48 @@
             populateSubDropdown(document.getElementById('req-main-location'), document.getElementById('req-sub-location'));
         }
 
-        function populateFilterSubDropdown(selectedMain, subDropdown) {
-            if (!subDropdown) return;
-            subDropdown.innerHTML = '<option value="">الكل</option>';
-            if (selectedMain && appState.settings.slaughterhouses[selectedMain]) {
-                appState.settings.slaughterhouses[selectedMain].forEach(branch => {
-                    const opt = document.createElement('option');
-                    opt.value = branch;
-                    opt.innerText = branch;
-                    subDropdown.appendChild(opt);
-                });
-            }
-        }
-
         function onEmpFilterMainChange() {
-            populateFilterSubDropdown(document.getElementById('filter-emp-main').value, document.getElementById(
-                'filter-emp-sub'));
+            populateSubDropdown(document.getElementById('filter-emp-main'), document.getElementById('filter-emp-sub'));
             renderEmployeesTable();
         }
 
         function onAttFilterMainChange() {
-            populateFilterSubDropdown(document.getElementById('filter-att-main').value, document.getElementById(
-                'filter-att-sub'));
+            populateSubDropdown(document.getElementById('filter-att-main'), document.getElementById('filter-att-sub'));
             renderAttendanceTable();
         }
 
         function onMaintFilterMainChange() {
-            populateFilterSubDropdown(document.getElementById('filter-maint-main').value, document.getElementById(
-                'filter-maint-sub'));
+            populateSubDropdown(document.getElementById('filter-maint-main'), document.getElementById('filter-maint-sub'));
             renderMaintenanceTable();
         }
 
         function onInvFilterMainChange() {
-            populateFilterSubDropdown(document.getElementById('filter-inv-main').value, document.getElementById(
-                'filter-inv-sub'));
+            populateSubDropdown(document.getElementById('filter-inv-main'), document.getElementById('filter-inv-sub'));
             renderInventoryTable();
         }
 
         function onPurFilterMainChange() {
-            populateFilterSubDropdown(document.getElementById('filter-pur-main').value, document.getElementById(
-                'filter-pur-sub'));
+            populateSubDropdown(document.getElementById('filter-pur-main'), document.getElementById('filter-pur-sub'));
             renderPurchasesTable();
         }
 
         function onReqFilterMainChange() {
-            populateFilterSubDropdown(document.getElementById('filter-req-main').value, document.getElementById(
-                'filter-req-sub'));
+            populateSubDropdown(document.getElementById('filter-req-main'), document.getElementById('filter-req-sub'));
             renderRequestsTable();
+        }
+
+        // تحديث قوائم التقارير
+        function populateReportDropdowns() {
+            const certSelect = document.getElementById('cert-emp-id');
+            if (certSelect) {
+                certSelect.innerHTML = '<option value="">-- اختر --</option>';
+                appState.employees.forEach(emp => {
+                    const opt = document.createElement('option');
+                    opt.value = emp.empId;
+                    opt.innerText = `${emp.name} (${emp.empId}) - ${emp.job}`;
+                    certSelect.appendChild(opt);
+                });
+            }
         }
 
         function renderSlaughterhousesTree() {
@@ -1886,8 +1991,7 @@
         async function removeSubSlaughterhouse(mainName, subName) {
             if (!isAdmin()) return;
             if (confirm(`حذف الفرع (${subName})؟`)) {
-                appState.settings.slaughterhouses[mainName] = appState.settings.slaughterhouses[mainName].filter(s => s !==
-                    subName);
+                appState.settings.slaughterhouses[mainName] = appState.settings.slaughterhouses[mainName].filter(s => s !== subName);
                 await saveAllData();
                 renderSlaughterhousesTree();
                 updateSlaughterhouseDropdowns();
@@ -1949,8 +2053,7 @@
                 wrapper.classList.remove('hidden');
             } else {
                 wrapper.classList.add('hidden');
-                document.querySelectorAll('#slaughter-certificates-wrapper input[type="checkbox"]').forEach(cb => cb
-                    .checked = false);
+                document.querySelectorAll('#slaughter-certificates-wrapper input[type="checkbox"]').forEach(cb => cb.checked = false);
             }
         }
 
@@ -2050,6 +2153,7 @@
             resetEmpForm();
             renderEmployeesTable();
             populateEmployeesDropdowns();
+            populateReportDropdowns();
         }
 
         function editEmployee(empId) {
@@ -2089,6 +2193,7 @@
                 await saveAllData();
                 renderEmployeesTable();
                 populateEmployeesDropdowns();
+                populateReportDropdowns();
                 if (emp) notifyAdminAndGM(`تم حذف الموظف: ${emp.name}`);
                 alertCustom("تم حذف الموظف");
             }
@@ -2102,23 +2207,98 @@
             return diffDays;
         }
 
-        function generateSalaryCertificate(empId) {
-            const emp = appState.employees.find(e => e.empId === empId);
-            if (!emp) return;
+        // ============================================
+        // تقرير الحضور والانصراف وكشف الرواتب
+        // ============================================
+        function generateAttendanceSalaryReport() {
+            const mainSlaughterhouse = document.getElementById('report-main-slaughterhouse').value;
+            const subSlaughterhouse = document.getElementById('report-sub-slaughterhouse').value;
+            const dateFrom = document.getElementById('report-date-from').value;
+            const dateTo = document.getElementById('report-date-to').value;
+
+            // تصفية الموظفين حسب الموقع
+            let filteredEmployees = appState.employees.filter(emp => {
+                const matchMain = !mainSlaughterhouse || emp.mainSlaughterhouse === mainSlaughterhouse;
+                const matchSub = !subSlaughterhouse || emp.subSlaughterhouse === subSlaughterhouse;
+                return matchMain && matchSub;
+            });
+
+            if (filteredEmployees.length === 0) {
+                alertCustom("لا يوجد موظفين في هذا الفرع!");
+                return;
+            }
+
+            // حساب أيام الحضور لكل موظف
+            let rows = '';
+            let totalSalary = 0;
+            let totalAttendance = 0;
+
+            filteredEmployees.forEach(emp => {
+                // حساب عدد أيام الحضور في الفترة المحددة
+                let attendanceDays = 0;
+                const empAttendance = appState.attendance.filter(a => a.empId === emp.empId);
+                
+                empAttendance.forEach(a => {
+                    if (dateFrom && a.date < dateFrom) return;
+                    if (dateTo && a.date > dateTo) return;
+                    if (a.status === 'حاضر' || a.status === 'متأخر') {
+                        attendanceDays++;
+                    }
+                });
+
+                const totalSalaryEmp = parseFloat(emp.salary) || 0;
+                totalSalary += totalSalaryEmp;
+                totalAttendance += attendanceDays;
+
+                rows += `
+                    <tr>
+                        <td class="border p-2 text-xs">${emp.empId}</td>
+                        <td class="border p-2 text-xs font-bold">${emp.name}</td>
+                        <td class="border p-2 text-xs">${emp.job}</td>
+                        <td class="border p-2 text-xs text-center">${attendanceDays}</td>
+                        <td class="border p-2 text-xs text-center">${totalSalaryEmp.toLocaleString()} درهم</td>
+                        <td class="border p-2 text-xs text-center font-bold text-emerald-700">${totalSalaryEmp.toLocaleString()} درهم</td>
+                    </tr>
+                `;
+            });
 
             const content = `
                 <div class="text-center">
-                    <span class="px-6 py-2 bg-emerald-50 border-2 border-emerald-800 text-emerald-900 text-lg font-bold rounded-full shadow-sm tracking-wide">شهادة راتب</span>
+                    <span class="px-6 py-2 bg-emerald-50 border-2 border-emerald-800 text-emerald-900 text-lg font-bold rounded-full shadow-sm tracking-wide">تقرير الحضور والانصراف وكشف الرواتب</span>
                 </div>
-                <div class="text-justify leading-loose text-base text-gray-800 px-4 mt-8">
-                    <p>تشهد شركة الجزيرة الخضراء بأن الموظف (${emp.name}) يعمل بوظيفة (${emp.job}) برقم (${emp.empId}) جنسيته (${emp.nationality}) برقم الجواز (${emp.passport}) والهوية (${emp.nid}) منذ (${emp.hireDate}).</p>
+                <div class="mt-4 text-xs text-gray-500 text-center">
+                    ${mainSlaughterhouse ? `المسلخ الرئيسي: ${mainSlaughterhouse}` : 'جميع المسالخ'} 
+                    ${subSlaughterhouse ? ` | الفرعي: ${subSlaughterhouse}` : ''}
+                    ${dateFrom ? ` | من: ${dateFrom}` : ''}
+                    ${dateTo ? ` | إلى: ${dateTo}` : ''}
                 </div>
-                <div class="border border-gray-300 rounded-lg overflow-hidden my-6">
-                    <div class="bg-emerald-50 px-4 py-2 font-bold text-emerald-900 text-sm border-b">تفاصيل المستحقات:</div>
-                    <div class="grid grid-cols-2 text-sm">
-                        <div class="p-3 border-r border-b"><span class="font-bold text-gray-500 ml-2">الراتب الأساسي:</span> <span class="font-semibold text-emerald-800">${parseFloat(emp.salary).toLocaleString()}</span> درهم</div>
-                        <div class="p-3 border-b"><span class="font-bold text-gray-500 ml-2">تاريخ الإصدار:</span> ${new Date().toLocaleDateString('ar-EG')}</div>
-                    </div>
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full border-collapse border border-emerald-600 text-sm text-right">
+                        <thead>
+                            <tr class="bg-emerald-50">
+                                <th class="border p-2 text-xs font-bold">الرقم</th>
+                                <th class="border p-2 text-xs font-bold">الاسم</th>
+                                <th class="border p-2 text-xs font-bold">الوظيفة</th>
+                                <th class="border p-2 text-xs font-bold text-center">عدد أيام الحضور</th>
+                                <th class="border p-2 text-xs font-bold text-center">الراتب الأساسي</th>
+                                <th class="border p-2 text-xs font-bold text-center text-emerald-700">الراتب الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-emerald-50 font-bold">
+                                <td colspan="3" class="border p-2 text-xs">الإجمالي</td>
+                                <td class="border p-2 text-xs text-center">${totalAttendance}</td>
+                                <td class="border p-2 text-xs text-center">${totalSalary.toLocaleString()} درهم</td>
+                                <td class="border p-2 text-xs text-center text-emerald-700">${totalSalary.toLocaleString()} درهم</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="mt-4 text-xs text-gray-500 text-center">
+                    عدد الموظفين: ${filteredEmployees.length} | تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}
                 </div>
             `;
 
@@ -2126,7 +2306,7 @@
 
             const options = {
                 margin: [10, 10, 10, 10],
-                filename: `شهادة_راتب_${emp.name.replace(/\s+/g, '_')}.pdf`,
+                filename: `تقرير_الحضور_والرواتب_${new Date().toISOString().slice(0,10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -2134,64 +2314,113 @@
             html2pdf().from(document.getElementById('print-area')).set(options).save();
         }
 
-        function renderEmployeesTable() {
-            const tbody = document.getElementById('emp-table-body');
-            if (!tbody) return;
-            tbody.innerHTML = '';
+        // ============================================
+        // شهادة راتب موظف (PDF حقيقي)
+        // ============================================
+        function generateSalaryCertificate() {
+            const empId = document.getElementById('cert-emp-id').value;
+            const certType = document.getElementById('cert-type').value;
 
-            const searchTerm = document.getElementById('emp-search')?.value?.toLowerCase() || '';
-            const filterMain = document.getElementById('filter-emp-main')?.value || '';
-            const filterSub = document.getElementById('filter-emp-sub')?.value || '';
-            const role = appState.currentActiveUser?.role;
-
-            let filtered = appState.employees.filter(emp => {
-                const matchesSearch = emp.name.toLowerCase().includes(searchTerm) || emp.empId.toLowerCase()
-                    .includes(searchTerm);
-                const matchesMain = !filterMain || emp.mainSlaughterhouse === filterMain;
-                const matchesSub = !filterSub || emp.subSlaughterhouse === filterSub;
-                return matchesSearch && matchesMain && matchesSub;
-            });
-
-            if (role === "مشرف مسلخ") {
-                filtered = filtered.filter(emp => 
-                    emp.job !== "مدير عام" && emp.job !== "مدير إداري" && emp.job !== "مستشار فني"
-                );
-            }
-
-            if (filtered.length === 0) {
-                tbody.innerHTML =
-                    `<tr><td colspan="9" class="text-center py-8 text-gray-400">لا يوجد موظفون</td></tr>`;
+            if (!empId) {
+                alertCustom("الرجاء اختيار موظف!");
                 return;
             }
 
-            filtered.forEach(emp => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50 transition";
-                let certsHtml = '<span class="text-gray-400 text-xs">لا توجد</span>';
-                if (emp.job === "قصاب" && emp.certificates?.length > 0) {
-                    certsHtml = emp.certificates.map(c =>
-                        `<span class="inline-block bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full m-0.5">${c}</span>`
-                    ).join('');
-                }
-                tr.innerHTML = `
-                        <td class="px-4 py-3 font-semibold text-emerald-800">${emp.empId}</td>
-                        <td class="px-4 py-3 font-semibold text-slate-800">${emp.name}</td>
-                        <td class="px-4 py-3 text-xs text-gray-600">${emp.job}</td>
-                        <td class="px-4 py-3 text-xs">${emp.mainSlaughterhouse || ''} ${emp.subSlaughterhouse ? '- '+emp.subSlaughterhouse : ''}</td>
-                        <td class="px-4 py-3 text-xs">${emp.nationality}</td>
-                        <td class="px-4 py-3 text-xs min-w-[120px]">${certsHtml}</td>
-                        <td class="px-4 py-3 font-semibold text-emerald-700">${parseFloat(emp.salary).toLocaleString()} درهم</td>
-                        <td class="px-4 py-3 font-semibold text-amber-600">${emp.leaveBalance || 30} يوم</td>
-                        <td class="px-4 py-3 text-center">
-                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                ${canInput() ? `<button onclick="editEmployee('${emp.empId}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs"><i class="fa-solid fa-pen"></i></button>` : ''}
-                                <button onclick="generateSalaryCertificate('${emp.empId}')" class="px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded text-xs"><i class="fa-solid fa-file-pdf"></i> شهادة</button>
-                                ${canInput() ? `<button onclick="deleteEmployee('${emp.empId}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
-                            </div>
-                        </td>
-                    `;
-                tbody.appendChild(tr);
-            });
+            const emp = appState.employees.find(e => e.empId === empId);
+            if (!emp) {
+                alertCustom("الموظف غير موجود!");
+                return;
+            }
+
+            const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+            const hireDate = emp.hireDate ? new Date(emp.hireDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
+            
+            // حساب عدد أيام الحضور لهذا الشهر
+            const now = new Date();
+            const monthStart = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+            const monthEnd = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(new Date(now.getFullYear(), now.getMonth()+1, 0).getDate()).padStart(2,'0')}`;
+            
+            const attendanceCount = appState.attendance.filter(a => 
+                a.empId === empId && 
+                a.date >= monthStart && 
+                a.date <= monthEnd && 
+                (a.status === 'حاضر' || a.status === 'متأخر')
+            ).length;
+
+            const salary = parseFloat(emp.salary) || 0;
+
+            let certText = '';
+            let certTitle = '';
+
+            if (certType === 'راتب') {
+                certTitle = 'شهادة راتب';
+                certText = `
+                    <p>تشهد شركة الجزيرة الخضراء لتجارة الأغنام والمواشي بأن الموظف <strong>${emp.name}</strong> يعمل لديها بوظيفة <strong>${emp.job}</strong>.</p>
+                    <p>البيانات الشخصية:</p>
+                    <ul style="list-style:none; padding-right:20px; margin:10px 0;">
+                        <li>• الرقم الوظيفي: <strong>${emp.empId}</strong></li>
+                        <li>• الجنسية: <strong>${emp.nationality}</strong></li>
+                        <li>• رقم الجواز: <strong>${emp.passport}</strong></li>
+                        <li>• رقم الهوية: <strong>${emp.nid}</strong></li>
+                        <li>• تاريخ التعيين: <strong>${hireDate}</strong></li>
+                    </ul>
+                    <p>الراتب الأساسي الشهري: <strong>${salary.toLocaleString()} درهم</strong></p>
+                    <p>عدد أيام الحضور لهذا الشهر: <strong>${attendanceCount} يوم</strong></p>
+                    <p style="margin-top:15px;">وتمنح هذه الشهادة بناءً على طلب الموظف لتكون سنداً له لدى الجهات المعنية.</p>
+                `;
+            } else if (certType === 'خبرة') {
+                certTitle = 'شهادة خبرة';
+                certText = `
+                    <p>تشهد شركة الجزيرة الخضراء لتجارة الأغنام والمواشي بأن الموظف <strong>${emp.name}</strong> يعمل لديها بوظيفة <strong>${emp.job}</strong> منذ تاريخ <strong>${hireDate}</strong> وحتى تاريخه.</p>
+                    <p>البيانات الشخصية:</p>
+                    <ul style="list-style:none; padding-right:20px; margin:10px 0;">
+                        <li>• الرقم الوظيفي: <strong>${emp.empId}</strong></li>
+                        <li>• الجنسية: <strong>${emp.nationality}</strong></li>
+                        <li>• رقم الجواز: <strong>${emp.passport}</strong></li>
+                        <li>• رقم الهوية: <strong>${emp.nid}</strong></li>
+                    </ul>
+                    <p>وقد أبدى الموظف خلال فترة عمله التفاني والإخلاص في أداء مهامه.</p>
+                    <p style="margin-top:15px;">وتمنح هذه الشهادة بناءً على طلب الموظف لتكون سنداً له لدى الجهات المعنية.</p>
+                `;
+            } else {
+                certTitle = 'شهادة توصية';
+                certText = `
+                    <p>تشهد شركة الجزيرة الخضراء لتجارة الأغنام والمواشي بأن الموظف <strong>${emp.name}</strong> يعمل لديها بوظيفة <strong>${emp.job}</strong> منذ تاريخ <strong>${hireDate}</strong>.</p>
+                    <p>البيانات الشخصية:</p>
+                    <ul style="list-style:none; padding-right:20px; margin:10px 0;">
+                        <li>• الرقم الوظيفي: <strong>${emp.empId}</strong></li>
+                        <li>• الجنسية: <strong>${emp.nationality}</strong></li>
+                        <li>• رقم الجواز: <strong>${emp.passport}</strong></li>
+                    </ul>
+                    <p>نوصي بهذا الموظف لما أظهره من كفاءة عالية وأمانة وإخلاص في العمل.</p>
+                    <p style="margin-top:15px;">وتمنح هذه الشهادة بناءً على طلب الموظف لتكون سنداً له لدى الجهات المعنية.</p>
+                `;
+            }
+
+            const content = `
+                <div class="text-center">
+                    <span class="px-6 py-2 bg-emerald-50 border-2 border-emerald-800 text-emerald-900 text-lg font-bold rounded-full shadow-sm tracking-wide">${certTitle}</span>
+                </div>
+                <div class="mt-8 text-justify leading-loose text-base text-gray-800 px-4" style="line-height:2.2; font-size:15px;">
+                    ${certText}
+                </div>
+                <div class="mt-6 border-t border-gray-200 pt-4 text-sm text-gray-600" style="line-height:1.8;">
+                    <p><strong>تاريخ الإصدار:</strong> ${today}</p>
+                    <p><strong>الموظف:</strong> ${emp.name}</p>
+                    <p><strong>الرقم الوظيفي:</strong> ${emp.empId}</p>
+                </div>
+            `;
+
+            document.getElementById('cert-dynamic-content').innerHTML = content;
+
+            const options = {
+                margin: [10, 10, 10, 10],
+                filename: `${certType}_${emp.name.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(document.getElementById('print-area')).set(options).save();
         }
 
         // ============================================
@@ -2978,9 +3207,6 @@
             });
         }
 
-        // ============================================
-        // تقرير طلبات المواد PDF
-        // ============================================
         function exportRequestsPDF() {
             const filterMain = document.getElementById('filter-req-main')?.value || '';
             const filterSub = document.getElementById('filter-req-sub')?.value || '';
@@ -3080,7 +3306,7 @@
         }
 
         async function resetBranding() {
-            appState.settings.logoImage = "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=120&h=120";
+            appState.settings.logoImage = "https://cdn-icons-png.flaticon.com/512/616/616490.png";
             appState.settings.welcomeImage = "https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=1200";
             await saveAllData();
             applyBrandingStyles();
@@ -3161,7 +3387,7 @@
         }
 
         // ============================================
-        // بدء التشغيل - التحقق الفوري من الجلسة
+        // بدء التشغيل
         // ============================================
         window.onload = async function() {
             await loadAllData();
@@ -3175,7 +3401,6 @@
             console.log("📋 المستخدمين المسجلين:");
             console.table(appState.settings.users);
 
-            // التحقق من الجلسة فوراً وإخفاء شاشة الدخول إذا كان هناك مستخدم
             const hasSession = checkSessionAndShowDashboard();
             
             if (!hasSession) {
