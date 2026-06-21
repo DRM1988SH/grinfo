@@ -131,7 +131,6 @@
             font-size: 14px;
         }
 
-        /* حفظ حالة الشاشة */
         .screen-content { display: none; }
         .screen-content.active { display: block; }
     </style>
@@ -1174,7 +1173,7 @@
                 welcomeImage: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=1200"
             },
             currentActiveUser: null,
-            currentScreen: 'emp-manage'  // حفظ الشاشة الحالية
+            currentScreen: 'emp-manage'
         };
 
         let isSidebarOpen = true;
@@ -1395,7 +1394,7 @@
         }
 
         // ============================================
-        // دوال الواجهة الأساسية - مع حفظ حالة الشاشة
+        // دوال الواجهة الأساسية
         // ============================================
         function toggleSidebar() {
             isSidebarOpen = !isSidebarOpen;
@@ -1438,25 +1437,20 @@
             applySidebarClasses();
         });
 
-        // دالة تبديل الشاشات مع حفظ الحالة
         function switchScreen(screenId) {
-            // حفظ الشاشة الحالية
             appState.currentScreen = screenId;
             
-            // إخفاء جميع الشاشات
             document.querySelectorAll('.screen-content').forEach(s => {
                 s.classList.remove('active');
                 s.classList.add('hidden');
             });
             
-            // إظهار الشاشة المطلوبة
             const target = document.getElementById(`screen-${screenId}`);
             if (target) {
                 target.classList.remove('hidden');
                 target.classList.add('active');
             }
 
-            // تحديث القائمة الجانبية
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 if (btn.getAttribute('data-screen') === screenId || (screenId === 'settings-screen' && btn.id ===
                         'settings-sidebar-btn')) {
@@ -1554,7 +1548,6 @@
             renderSlaughterhousesTree();
             populateEmployeesDropdowns();
             
-            // العودة إلى آخر شاشة تم استخدامها
             const lastScreen = appState.currentScreen || 'emp-manage';
             switchScreen(lastScreen);
             
@@ -1571,7 +1564,9 @@
 
         function logout() {
             appState.currentActiveUser = null;
-            appState.currentScreen = 'emp-manage'; // إعادة تعيين الشاشة عند الخروج
+            appState.currentScreen = 'emp-manage';
+            localStorage.removeItem('gilm_user');
+            localStorage.removeItem('gilm_screen');
             saveAllData();
             showLogin();
         }
@@ -1612,17 +1607,15 @@
         }
 
         // ============================================
-        // منع إعادة التحميل الكامل عند F5 - الحفاظ على الشاشة
+        // حفظ واستعادة الحالة عند تحديث الصفحة
         // ============================================
         window.addEventListener('beforeunload', function(e) {
-            // حفظ حالة المستخدم والشاشة في localStorage
             if (appState.currentActiveUser) {
                 localStorage.setItem('gilm_user', JSON.stringify(appState.currentActiveUser));
                 localStorage.setItem('gilm_screen', appState.currentScreen);
             }
         });
 
-        // استعادة الحالة عند التحميل
         function restoreState() {
             const savedUser = localStorage.getItem('gilm_user');
             const savedScreen = localStorage.getItem('gilm_screen');
@@ -1630,7 +1623,6 @@
             if (savedUser) {
                 try {
                     const user = JSON.parse(savedUser);
-                    // التحقق من صحة المستخدم
                     const validUser = appState.settings.users.find(u => u.empId === user.empId && u.code === user.code);
                     if (validUser) {
                         appState.currentActiveUser = validUser;
@@ -1656,7 +1648,6 @@
 
             if (loginUser(empId, code)) {
                 document.getElementById('login-error').classList.add('hidden');
-                // حفظ المستخدم في localStorage
                 localStorage.setItem('gilm_user', JSON.stringify(appState.currentActiveUser));
                 showDashboard();
             } else {
@@ -3098,10 +3089,8 @@
             console.log("📋 المستخدمين المسجلين:");
             console.table(appState.settings.users);
 
-            // محاولة استعادة الحالة
             if (restoreState()) {
                 showDashboard();
-                // حفظ الشاشة الحالية مرة أخرى
                 localStorage.setItem('gilm_screen', appState.currentScreen);
             } else if (appState.currentActiveUser) {
                 showDashboard();
