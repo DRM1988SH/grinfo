@@ -115,7 +115,6 @@
             font-size: 13px;
         }
 
-        /* رسالة التاكيد تظهر لمدة ثانية ثم تختفي */
         .toast-message {
             position: fixed;
             bottom: 30px;
@@ -131,6 +130,10 @@
             animation: fade-in 0.3s ease-out;
             font-size: 14px;
         }
+
+        /* حفظ حالة الشاشة */
+        .screen-content { display: none; }
+        .screen-content.active { display: block; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen overflow-x-hidden">
@@ -265,7 +268,7 @@
             <main id="main-content-area" class="flex-grow p-4 md:p-6 overflow-y-auto max-h-[calc(100vh-140px)] transition-all duration-300">
 
                 <!-- شاشة إدارة الموظفين -->
-                <div id="screen-emp-manage" class="screen-content space-y-6">
+                <div id="screen-emp-manage" class="screen-content active space-y-6">
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl md:text-2xl font-bold text-emerald-900">إدارة شؤون الموظفين</h2>
                     </div>
@@ -1082,9 +1085,8 @@
         </footer>
     </div>
 
-    <!-- قالب شهادة الراتب وطلب الإجازة -->
+    <!-- قالب الطباعة الموحد -->
     <div id="print-area" class="hidden p-12 bg-white text-gray-900 border-[16px] border-emerald-800 rounded-lg max-w-4xl mx-auto shadow-2xl relative min-h-[1000px] flex flex-col justify-between">
-        <!-- الهيدر ثابت -->
         <div class="flex justify-between items-center border-b-4 border-emerald-700 pb-6 mb-8">
             <div>
                 <h1 class="text-2xl font-bold text-emerald-800">شركة الجزيرة الخضراء لتجارة المواشي والاغنام</h1>
@@ -1097,28 +1099,42 @@
             </div>
         </div>
 
-        <!-- المحتوى الديناميكي -->
         <div id="cert-dynamic-content" class="flex-grow space-y-8 my-auto"></div>
 
-        <!-- الفوتر ثابت مع عبارة معتمدة -->
         <div class="mt-8">
             <div class="text-center text-sm font-bold text-emerald-700 border-t-2 border-emerald-600 pt-3 mb-4">
                 هذه الشهادة معتمدة الكترونياً ولا تحتاج إلى توقيع
             </div>
             <div class="grid grid-cols-2 gap-8 text-center mt-4 border-t border-gray-100 pt-6">
-                <div><p class="text-xs font-bold text-gray-400 mb-1">المدير الإداري</p><div class="mt-2 h-10 flex items-center justify-center"><span class="text-xs text-gray-300 italic">[توقيع]</span></div></div>
-                <div><p class="text-xs font-bold text-gray-400 mb-1">المدير العام</p><div class="mt-2 h-10 flex items-center justify-center"><span class="text-xs text-emerald-600/30 font-bold rotate-12 select-none border-2 border-emerald-600/30 p-1 rounded">معتمد</span></div></div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 mb-1">المدير الإداري</p>
+                    <div class="mt-2 h-10 flex items-center justify-center">
+                        <span class="text-xs text-gray-300 italic">[توقيع]</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 mb-1">المدير العام</p>
+                    <div class="mt-2 h-10 flex items-center justify-center">
+                        <span class="text-xs text-emerald-600/30 font-bold rotate-12 select-none border-2 border-emerald-600/30 p-1 rounded">معتمد</span>
+                    </div>
+                </div>
             </div>
             <div class="mt-6 pt-4 border-t-2 border-emerald-800 flex justify-between items-center text-[11px] text-gray-500">
-                <div><p class="font-bold text-emerald-800">شركة الجزيرة الخضراء</p><p>دولة الإمارات العربية المتحدة</p></div>
-                <div class="text-left font-semibold"><p>info@grisland.com</p><p>www.grisland.com</p></div>
+                <div>
+                    <p class="font-bold text-emerald-800">شركة الجزيرة الخضراء</p>
+                    <p>دولة الإمارات العربية المتحدة</p>
+                </div>
+                <div class="text-left font-semibold">
+                    <p>info@grisland.com</p>
+                    <p>www.grisland.com</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // ============================================
-        // المستخدمين الافتراضيين - تغيير اسم الأدمن إلى Admin
+        // المستخدمين الافتراضيين
         // ============================================
         const DEFAULT_USERS = [
             { empId: "70062", name: "Admin", code: "123456", role: "أدمن" },
@@ -1157,7 +1173,8 @@
                 logoImage: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=120&h=120",
                 welcomeImage: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=1200"
             },
-            currentActiveUser: null
+            currentActiveUser: null,
+            currentScreen: 'emp-manage'  // حفظ الشاشة الحالية
         };
 
         let isSidebarOpen = true;
@@ -1324,6 +1341,11 @@
         }
 
         function updateNotificationBadge() {
+            const role = appState.currentActiveUser?.role;
+            if (role !== "أدمن" && role !== "إداري" && role !== "المدير العام") {
+                document.getElementById('notif-count').classList.add('hidden');
+                return;
+            }
             const unread = appState.notifications.filter(n => !n.read).length;
             const badge = document.getElementById('notif-count');
             if (unread > 0) {
@@ -1373,7 +1395,7 @@
         }
 
         // ============================================
-        // دوال الواجهة الأساسية
+        // دوال الواجهة الأساسية - مع حفظ حالة الشاشة
         // ============================================
         function toggleSidebar() {
             isSidebarOpen = !isSidebarOpen;
@@ -1416,11 +1438,25 @@
             applySidebarClasses();
         });
 
+        // دالة تبديل الشاشات مع حفظ الحالة
         function switchScreen(screenId) {
-            document.querySelectorAll('.screen-content').forEach(s => s.classList.add('hidden'));
+            // حفظ الشاشة الحالية
+            appState.currentScreen = screenId;
+            
+            // إخفاء جميع الشاشات
+            document.querySelectorAll('.screen-content').forEach(s => {
+                s.classList.remove('active');
+                s.classList.add('hidden');
+            });
+            
+            // إظهار الشاشة المطلوبة
             const target = document.getElementById(`screen-${screenId}`);
-            if (target) target.classList.remove('hidden');
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('active');
+            }
 
+            // تحديث القائمة الجانبية
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 if (btn.getAttribute('data-screen') === screenId || (screenId === 'settings-screen' && btn.id ===
                         'settings-sidebar-btn')) {
@@ -1517,7 +1553,11 @@
             updateSlaughterhouseDropdowns();
             renderSlaughterhousesTree();
             populateEmployeesDropdowns();
-            switchScreen('emp-manage');
+            
+            // العودة إلى آخر شاشة تم استخدامها
+            const lastScreen = appState.currentScreen || 'emp-manage';
+            switchScreen(lastScreen);
+            
             renderEmployeesTable();
             renderLeavesTable();
             renderAttendanceTable();
@@ -1531,6 +1571,7 @@
 
         function logout() {
             appState.currentActiveUser = null;
+            appState.currentScreen = 'emp-manage'; // إعادة تعيين الشاشة عند الخروج
             saveAllData();
             showLogin();
         }
@@ -1547,7 +1588,6 @@
             }
         }
 
-        // رسالة تاكيد لمدة ثانية ثم تختفي
         function showToast(message) {
             const existing = document.querySelector('.toast-message');
             if (existing) existing.remove();
@@ -1572,6 +1612,41 @@
         }
 
         // ============================================
+        // منع إعادة التحميل الكامل عند F5 - الحفاظ على الشاشة
+        // ============================================
+        window.addEventListener('beforeunload', function(e) {
+            // حفظ حالة المستخدم والشاشة في localStorage
+            if (appState.currentActiveUser) {
+                localStorage.setItem('gilm_user', JSON.stringify(appState.currentActiveUser));
+                localStorage.setItem('gilm_screen', appState.currentScreen);
+            }
+        });
+
+        // استعادة الحالة عند التحميل
+        function restoreState() {
+            const savedUser = localStorage.getItem('gilm_user');
+            const savedScreen = localStorage.getItem('gilm_screen');
+            
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    // التحقق من صحة المستخدم
+                    const validUser = appState.settings.users.find(u => u.empId === user.empId && u.code === user.code);
+                    if (validUser) {
+                        appState.currentActiveUser = validUser;
+                        if (savedScreen) {
+                            appState.currentScreen = savedScreen;
+                        }
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('Error restoring state:', e);
+                }
+            }
+            return false;
+        }
+
+        // ============================================
         // دوال تسجيل الدخول - حدث
         // ============================================
         document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -1581,6 +1656,8 @@
 
             if (loginUser(empId, code)) {
                 document.getElementById('login-error').classList.add('hidden');
+                // حفظ المستخدم في localStorage
+                localStorage.setItem('gilm_user', JSON.stringify(appState.currentActiveUser));
                 showDashboard();
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
@@ -2219,7 +2296,6 @@
             await saveAllData();
             renderLeavesTable();
             
-            // إشعار لمشرف المسلخ عند الاعتماد
             const leave = appState.leaves[idx];
             const emp = appState.employees.find(e => e.empId === leave.empId);
             notifyAdminAndGM(
@@ -3008,7 +3084,7 @@
         }
 
         // ============================================
-        // بدء التشغيل
+        // بدء التشغيل مع استعادة الحالة
         // ============================================
         window.onload = async function() {
             await loadAllData();
@@ -3022,7 +3098,12 @@
             console.log("📋 المستخدمين المسجلين:");
             console.table(appState.settings.users);
 
-            if (appState.currentActiveUser) {
+            // محاولة استعادة الحالة
+            if (restoreState()) {
+                showDashboard();
+                // حفظ الشاشة الحالية مرة أخرى
+                localStorage.setItem('gilm_screen', appState.currentScreen);
+            } else if (appState.currentActiveUser) {
                 showDashboard();
             } else {
                 showLogin();
